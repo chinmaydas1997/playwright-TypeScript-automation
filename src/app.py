@@ -38,7 +38,14 @@ activities = {
         "schedule": "Mondays, Wednesdays, Fridays, 2:00 PM - 3:00 PM",
         "max_participants": 30,
         "participants": ["john@mergington.edu", "olivia@mergington.edu"]
-    }
+    },
+    "Math Club": {
+    "description": "Solve challenging math problems",
+    "schedule": "Tuesdays, 4:00 PM - 5:30 PM",
+    "availability": 8,
+    "participants": ["chinmay@mergington.edu", "moha@mergington.edu"]
+}
+    
 }
 
 
@@ -55,6 +62,7 @@ def get_activities():
 @app.post("/activities/{activity_name}/signup")
 def signup_for_activity(activity_name: str, email: str):
     """Sign up a student for an activity"""
+    
     # Validate activity exists
     if activity_name not in activities:
         raise HTTPException(status_code=404, detail="Activity not found")
@@ -62,6 +70,33 @@ def signup_for_activity(activity_name: str, email: str):
     # Get the specific activity
     activity = activities[activity_name]
 
+    # ✅ Add THIS check here
+    # Validate student is not already signed up
+    if email in activity["participants"]:
+        raise HTTPException(status_code=400, detail="Student already registered")
+
     # Add student
     activity["participants"].append(email)
+
     return {"message": f"Signed up {email} for {activity_name}"}
+
+
+@app.delete("/activities/{activity_name}/signup")
+def unregister_from_activity(activity_name: str, email: str):
+    """Unregister a student from an activity"""
+    
+    # Validate activity exists
+    if activity_name not in activities:
+        raise HTTPException(status_code=404, detail="Activity not found")
+
+    # Get the specific activity
+    activity = activities[activity_name]
+
+    # Validate student is registered
+    if email not in activity["participants"]:
+        raise HTTPException(status_code=400, detail="Student not registered")
+
+    # Remove student
+    activity["participants"].remove(email)
+
+    return {"message": f"Unregistered {email} from {activity_name}"}
